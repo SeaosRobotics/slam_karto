@@ -112,6 +112,8 @@ class SlamKarto
     tf::Transform map_to_odom_;
     unsigned marker_count_;
     bool inverted_laser_;
+
+    float range_threshold_;
 };
 
 SlamKarto::SlamKarto() :
@@ -292,6 +294,9 @@ SlamKarto::SlamKarto() :
   if(private_nh_.getParam("use_response_expansion", use_response_expansion))
     mapper_->setParamUseResponseExpansion(use_response_expansion);
 
+  range_threshold_ = 12.0;
+  private_nh_.getParam("range_threshold", range_threshold_);
+
   // Set solver to be used in loop closure
   solver_ = new SpaSolver();
   mapper_->SetScanSolver(solver_);
@@ -410,7 +415,7 @@ SlamKarto::getLaser(const sensor_msgs::LaserScan::ConstPtr& scan)
     laser->SetMaximumAngle(scan->angle_max);
     laser->SetAngularResolution(scan->angle_increment);
     // TODO: expose this, and many other parameters
-    //laser_->SetRangeThreshold(12.0);
+    laser->SetRangeThreshold(range_threshold_);
 
     // Store this laser device for later
     lasers_[scan->header.frame_id] = laser;
